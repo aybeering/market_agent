@@ -10,17 +10,17 @@ from langchain_core.output_parsers import StrOutputParser
 from ..classes import ResearchState
 from ..classes.state import job_status
 from ..prompts import (
-    COMPANY_BRIEFING_PROMPT,
-    INDUSTRY_BRIEFING_PROMPT,
-    FINANCIAL_BRIEFING_PROMPT,
-    NEWS_BRIEFING_PROMPT,
+    QUANTIFIABILITY_BRIEFING_PROMPT,
+    ORACLE_BRIEFING_PROMPT,
+    MARKET_DEMAND_BRIEFING_PROMPT,
+    COMPLIANCE_RISK_BRIEFING_PROMPT,
     BRIEFING_ANALYSIS_INSTRUCTION
 )
 
 logger = logging.getLogger(__name__)
 
 class Briefing:
-    """Creates briefings for each research category and updates the ResearchState."""
+    """为每个分析维度创建简报并更新 ResearchState。"""
     
     def __init__(self) -> None:
         self.max_doc_length = 8000  # Maximum document content length
@@ -29,7 +29,6 @@ class Briefing:
         if not openai_key:
             raise ValueError("OPENAI_API_KEY environment variable is not set")
         
-        # Use OpenAI for briefing generation to avoid Gemini dependency
         self.llm = ChatOpenAI(
             model="gpt-4o",
             temperature=0,
@@ -38,18 +37,18 @@ class Briefing:
         )
 
     def _get_category_prompt(self, category: str) -> str:
-        """Get the category-specific prompt template"""
+        """获取特定分析维度的 prompt 模板"""
         prompts = {
-            'company': COMPANY_BRIEFING_PROMPT,
-            'industry': INDUSTRY_BRIEFING_PROMPT,
-            'financial': FINANCIAL_BRIEFING_PROMPT,
-            'news': NEWS_BRIEFING_PROMPT,
+            'quantifiability': QUANTIFIABILITY_BRIEFING_PROMPT,
+            'oracle': ORACLE_BRIEFING_PROMPT,
+            'market_demand': MARKET_DEMAND_BRIEFING_PROMPT,
+            'compliance_risk': COMPLIANCE_RISK_BRIEFING_PROMPT,
         }
         return prompts.get(category, 
-                          "Create a focused, informative and insightful research briefing on the company: {company} in the {industry} industry based on the provided documents.")
+                          "基于提供的文档，为事件'{topic}'创建一份专业的可行性分析简报。")
     
     def _prepare_documents(self, docs: Union[Dict[str, Any], List[Dict[str, Any]]]) -> str:
-        """Prepare and format documents for briefing generation"""
+        """准备和格式化文档用于简报生成"""
         # Normalize docs to list of (url, doc) tuples
         items = list(docs.items()) if isinstance(docs, dict) else [
             (doc.get('url', f'doc_{i}'), doc) for i, doc in enumerate(docs)
@@ -70,9 +69,9 @@ class Briefing:
             content = doc.get('raw_content') or doc.get('content', '')
             
             if len(content) > self.max_doc_length:
-                content = content[:self.max_doc_length] + "... [content truncated]"
+                content = content[:self.max_doc_length] + "... [内容已截断]"
             
-            doc_entry = f"Title: {title}\n\nContent: {content}"
+            doc_entry = f"标题: {title}\n\n内容: {content}"
             if total_length + len(doc_entry) < 120000:  # Keep under limit
                 doc_texts.append(doc_entry)
                 total_length += len(doc_entry)
@@ -86,20 +85,20 @@ class Briefing:
         self, docs: Union[Dict[str, Any], List[Dict[str, Any]]], 
         category: str, context: Dict[str, Any]
     ):
-        """Generate category briefing and yield events"""
-        company = context.get('company', 'Unknown')
-        industry = context.get('industry', 'Unknown')
-        hq_location = context.get('hq_location', 'Unknown')
+        """生成特定维度的简报并发出事件"""
+        topic = context.get('topic', 'Unknown')
+        event_category = context.get('event_category', 'Unknown')
+        target_date = context.get('target_date', 'Unknown')
         job_id = context.get('job_id')
         
-        logger.info(f"Generating {category} briefing for {company} using {len(docs)} documents")
+        logger.info(f"Generating {category} briefing for {topic} using {len(docs)} documents")
 
         # Emit briefing start event
         event = {
             "type": "briefing_start",
             "category": category,
             "total_docs": len(docs),
-            "step": "Briefing"
+            "step": "简报生成"
         }
         
         if job_id:
@@ -113,7 +112,7 @@ class Briefing:
 
         # Get category-specific prompt and prepare documents
         category_prompt = self._get_category_prompt(category).format(
-            company=company, industry=industry, hq_location=hq_location
+            topic=topic, event_category=event_category, target_date=target_date
         )
         formatted_docs = self._prepare_documents(docs)
         
@@ -147,7 +146,7 @@ class Briefing:
                 "type": "briefing_complete",
                 "category": category,
                 "content_length": len(content),
-                "step": "Briefing"
+                "step": "简报生成"
             }
             
             if job_id:
@@ -164,23 +163,23 @@ class Briefing:
             raise RuntimeError(f"Fatal API error - {category} briefing generation failed: {str(e)}") from e
 
     async def create_briefings(self, state: ResearchState) -> ResearchState:
-        """Create briefings for all categories in parallel."""
-        company = state.get('company', 'Unknown Company')
-        logger.info(f"Creating section briefings for {company}")
+        """并行创建所有维度的简报。"""
+        topic = state.get('topic', 'Unknown Topic')
+        logger.info(f"Creating section briefings for {topic}")
         
         context = {
-            "company": company,
-            "industry": state.get('industry', 'Unknown'),
-            "hq_location": state.get('hq_location', 'Unknown'),
+            "topic": topic,
+            "event_category": state.get('event_category', 'Unknown'),
+            "target_date": state.get('target_date', 'Unknown'),
             "job_id": state.get('job_id')
         }
         
         # Mapping of curated data fields to briefing categories
         categories = {
-            'financial_data': ("financial", "financial_briefing"),
-            'news_data': ("news", "news_briefing"),
-            'industry_data': ("industry", "industry_briefing"),
-            'company_data': ("company", "company_briefing")
+            'quantifiability_data': ("quantifiability", "quantifiability_briefing"),
+            'oracle_data': ("oracle", "oracle_briefing"),
+            'market_demand_data': ("market_demand", "market_demand_briefing"),
+            'compliance_risk_data': ("compliance_risk", "compliance_risk_briefing")
         }
         
         briefings = {}
@@ -205,15 +204,13 @@ class Briefing:
 
         # Process briefings in parallel with rate limiting
         if briefing_tasks:
-            briefing_semaphore = asyncio.Semaphore(2)  # Limit to 2 concurrent briefings
+            briefing_semaphore = asyncio.Semaphore(4)  # Allow all 4 briefings in parallel
             
             async def process_briefing(task: Dict[str, Any]) -> Dict[str, Any]:
                 """Process a single briefing with rate limiting."""
                 async with briefing_semaphore:
                     result = {'content': ''}
                     
-                    # Consume events from briefing generation
-                    # Exceptions will propagate immediately (no catching)
                     async for event in self.generate_category_briefing(
                         task['curated_data'],
                         task['category'],
@@ -235,7 +232,7 @@ class Briefing:
                         'length': len(result['content']) if result['content'] else 0
                     }
 
-            # Process all briefings in parallel - exceptions will propagate and kill entire process
+            # Process all briefings in parallel
             results = await asyncio.gather(*[
                 process_briefing(task) 
                 for task in briefing_tasks

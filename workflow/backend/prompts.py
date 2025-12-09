@@ -1,233 +1,291 @@
 """
-Centralized prompts for the company research agent.
+Centralized prompts for the Event Futures Feasibility Analysis Agent.
 All LLM prompts are defined here for easy maintenance and updates.
 """
 
 # ============================================================================
-# BRIEFING PROMPTS
+# BRIEFING PROMPTS - 各维度简报生成
 # ============================================================================
 
-COMPANY_BRIEFING_PROMPT = """Create a focused, yet comprehensive company briefing for {company}, a {industry} company based in {hq_location}.
-Key requirements:
-1. Start with: "{company} is a [what] that [does what] for [whom]"
-2. Structure using these headers and bullet points:
+QUANTIFIABILITY_BRIEFING_PROMPT = """为事件"{topic}"创建一份可量化性评估简报。
+事件类别: {event_category}
+预期结算日期: {target_date}
 
-### Core Product/Service
-* List distinct products/features
-* Include only verified technical capabilities
+核心要求:
+1. 结构使用以下标题和要点:
 
-### Leadership Team
-* List key leadership team members
-* Include their roles and expertise
+### 事件定义
+* 事件的严格描述是什么
+* 事件的边界条件是什么
+* 事件是否存在歧义
 
-### Target Market
-* List specific target audiences
-* List verified use cases
-* List confirmed customers/partners
+### 量化标准
+* 判断标准是什么 (发生/未发生 或 具体数值)
+* 可量化的指标有哪些
+* 指标的精确度如何
 
-### Key Differentiators
-* List unique features
-* List proven advantages
+### 判定条件
+* 事件结果类型: 二元(Yes/No) 还是 连续数值
+* 是否存在多种可能的结果
+* 边界情况如何处理
 
-### Business Model
-* Discuss product / service pricing
-* List distribution channels
+### 可量化性评分
+* 综合评估该事件的可量化程度 (1-10分)
+* 主要优势
+* 主要挑战
 
-3. Each bullet must be a single, complete fact
-4. Never mention "no information found" or "no data available"
-5. No paragraphs, only bullet points
-6. Provide only the briefing. No explanations or commentary."""
+2. 每个要点必须是单一、完整的事实
+3. 不要提及"未找到信息"
+4. 只使用要点格式，不使用段落
+5. 只提供简报内容，不要解释或评论"""
 
-INDUSTRY_BRIEFING_PROMPT = """Create a focused, yet comprehensive industry briefing for {company}, a {industry} company based in {hq_location}.
-Key requirements:
-1. Structure using these exact headers and bullet points:
+ORACLE_BRIEFING_PROMPT = """为事件"{topic}"创建一份预言机与结算机制评估简报。
+事件类别: {event_category}
+预期结算日期: {target_date}
 
-### Market Overview
-* State {company}'s exact market segment
-* List market size with year
-* List growth rate with year range
+核心要求:
+1. 结构使用以下标题和要点:
 
-### Direct Competition
-* List named direct competitors
-* List specific competing products
-* List market positions
+### 可信数据源
+* 官方数据源有哪些 (政府机构、监管部门等)
+* 第三方权威数据源有哪些
+* 数据源的可靠性评估
 
-### Competitive Advantages
-• List unique technical features
-• List proven advantages
+### 结算时间表
+* 事件结果何时公布
+* 结算延迟风险有多大
+* 是否存在时区/时间歧义
 
-### Market Challenges
-• List specific verified challenges
+### 结算可靠性
+* 数据是否可能被篡改或争议
+* 历史上类似事件的结算情况
+* 异常情况的处理机制
 
-2. Each bullet must be a single, complete news event.
-3. No paragraphs, only bullet points
-4. Never mention "no information found" or "no data available"
-5. Provide only the briefing. No explanation."""
+### 预言机评分
+* 综合评估结算机制可靠性 (1-10分)
+* 推荐的数据源
+* 潜在风险点
 
-FINANCIAL_BRIEFING_PROMPT = """Create a focused, yet comprehensive financial briefing for {company}, a {industry} company based in {hq_location}.
-Key requirements:
-1. Structure using these headers and bullet points:
+2. 每个要点必须是单一、完整的事实
+3. 不要提及"未找到信息"
+4. 只使用要点格式
+5. 只提供简报内容"""
 
-### Funding & Investment
-* Total funding amount with date
-* List each funding round with date
-* List named investors
+MARKET_DEMAND_BRIEFING_PROMPT = """为事件"{topic}"创建一份市场需求与合约设计简报。
+事件类别: {event_category}
+预期结算日期: {target_date}
 
-### Revenue Model
-* Discuss product / service pricing if applicable
+核心要求:
+1. 结构使用以下标题和要点:
 
-2. Include specific numbers when possible
-3. No paragraphs, only bullet points
-4. Never mention "no information found" or "no data available"
-5. NEVER repeat the same round of funding multiple times. ALWAYS assume that multiple funding rounds in the same month are the same round.
-6. NEVER include a range of funding amounts. Use your best judgement to determine the exact amount based on the information provided.
-6. Provide only the briefing. No explanation or commentary."""
+### 市场关注度
+* 该事件的公众关注程度
+* 媒体报道密度
+* 社交媒体讨论热度
 
-NEWS_BRIEFING_PROMPT = """Create a focused, yet comprehensive news briefing for {company}, a {industry} company based in {hq_location}.
-Key requirements:
-1. Structure into these categories using bullet points:
+### 交易者兴趣
+* 谁会想交易这个事件 (对冲者/投机者/机构)
+* 类似事件在预测市场的交易量
+* 潜在的交易动机
 
-### Major Announcements
-* Product / service launches
-* New initiatives
+### 合约类型建议
+* 推荐二元合约(Yes/No)还是指数型合约
+* 建议的价格区间
+* 建议的到期日设置
 
-### Partnerships
-* Integrations
-* Collaborations
+### 类似合约参考
+* 历史上类似的预测市场合约
+* 这些合约的表现如何
+* 可借鉴的设计要点
 
-### Recognition
-* Awards
-* Press coverage
+### 市场需求评分
+* 综合评估市场需求程度 (1-10分)
+* 市场优势
+* 市场风险
 
-2. Sort newest to oldest
-3. One event per bullet point
-4. Do not mention "no information found" or "no data available"
-5. Never use ### headers, only bullet points
-6. Provide only the briefing. Do not provide explanations or commentary."""
+2. 每个要点必须是单一、完整的事实
+3. 只使用要点格式
+5. 只提供简报内容"""
 
-BRIEFING_ANALYSIS_INSTRUCTION = """Analyze the following documents and extract key information. Provide only the briefing, no explanations or commentary:"""
+COMPLIANCE_RISK_BRIEFING_PROMPT = """为事件"{topic}"创建一份合规与风险评估简报。
+事件类别: {event_category}
+预期结算日期: {target_date}
+
+核心要求:
+1. 结构使用以下标题和要点:
+
+### 法律合规性
+* 在主要司法管辖区(美国、欧盟、中国)的法律状态
+* 是否需要特定牌照或许可
+* 监管机构的态度
+
+### 伦理敏感性
+* 是否涉及生命安全
+* 是否涉及政治敏感话题
+* 是否可能引发道德争议
+
+### 操纵风险
+* 事件结果是否可能被人为影响
+* 内幕信息的风险有多大
+* 市场操纵的可能性
+
+### 声誉风险
+* 上线此合约对平台声誉的影响
+* 公众反应预测
+* 媒体风险评估
+
+### 合规风险评分
+* 综合合规风险评估 (1-10分，10为最安全)
+* 主要风险点
+* 风险缓解建议
+
+2. 每个要点必须是单一、完整的事实
+3. 只使用要点格式
+4. 只提供简报内容"""
+
+BRIEFING_ANALYSIS_INSTRUCTION = """分析以下文档并提取关键信息，只提供简报，不要解释或评论:"""
 
 
 # ============================================================================
-# EDITOR PROMPTS
+# EDITOR PROMPTS - 最终报告编译
 # ============================================================================
 
-EDITOR_SYSTEM_MESSAGE = "You are an expert report editor that compiles research briefings into comprehensive company reports."
+EDITOR_SYSTEM_MESSAGE = "你是一位专业的事件期货可行性分析专家，负责将各维度研究简报编译成综合可行性报告。"
 
-COMPILE_CONTENT_PROMPT = """You are compiling a comprehensive research report about {company}.
+COMPILE_CONTENT_PROMPT = """你正在编译关于"{topic}"的事件期货可行性报告。
 
-Compiled briefings:
+已编译的各维度简报:
 {combined_content}
 
-Create a deep, comprehensive, and thorough report on {company}, a {industry} company headquartered in {hq_location} that:
-1. Integrates information from all sections into a cohesive non-repetitive narrative
-2. Maintains important details from each section
-3. Logically organizes information and removes transitional commentary / explanations
-4. Uses clear section headers and structure
+基于以上内容，创建一份深入、全面的事件期货可行性报告:
 
-Formatting rules:
-Strictly enforce this EXACT document structure:
+1. 整合所有维度的信息形成连贯的分析叙述
+2. 保留每个维度的重要细节
+3. 逻辑组织信息，去除过渡性评论
+4. 使用清晰的章节标题和结构
+5. 在最后给出综合评分和明确建议
 
-# {company} Research Report
+严格执行以下文档结构:
 
-## Company Overview
-[Company content with ### subsections]
+# {topic} 事件期货可行性报告
 
-## Industry Overview
-[Industry content with ### subsections]
+## 事件概述
+[事件背景、定义、时间范围的简要描述]
 
-## Financial Overview
-[Financial content with ### subsections]
+## 可量化性评估
+[可量化性内容，使用 ### 子标题]
+**维度评分: X/10**
 
-## News
-[News content with ### subsections]
+## 预言机与结算机制
+[预言机内容，使用 ### 子标题]
+**维度评分: X/10**
 
-Return the report in clean markdown format. No explanations or commentary."""
+## 市场需求分析
+[市场需求内容，使用 ### 子标题]
+**维度评分: X/10**
 
-CONTENT_SWEEP_SYSTEM_MESSAGE = "You are an expert markdown formatter that ensures consistent document structure."
+## 合规与风险评估
+[合规风险内容，使用 ### 子标题]
+**维度评分: X/10**
 
-CONTENT_SWEEP_PROMPT = """You are an expert briefing editor. You are given a report on {company}.
+## 综合结论
+### 可行性总评分
+[基于四个维度的加权评分，给出 1-10 分]
 
-Current report:
+### 推荐决策
+[明确给出: 推荐上线 / 谨慎上线(需附加条件) / 不推荐上线]
+
+### 风险点汇总
+[列出主要风险点]
+
+### 优化建议
+[如何改进合约设计以提高可行性]
+
+返回 Markdown 格式的报告。不要解释或评论。"""
+
+CONTENT_SWEEP_SYSTEM_MESSAGE = "你是一位专业的 Markdown 格式化专家，确保文档结构一致。"
+
+CONTENT_SWEEP_PROMPT = """你是一位专业的可行性报告编辑。这是一份关于"{topic}"的事件期货可行性报告。
+
+当前报告:
 {content}
 
-1. Remove redundant or repetitive information
-2. Remove information that is not relevant to {company}, the {industry} company headquartered in {hq_location}.
-3. Remove sections lacking substantial content
-4. Remove any meta-commentary (e.g. "Here is the news...")
+1. 删除冗余或重复信息
+2. 删除与"{topic}"无关的信息
+3. 删除缺乏实质内容的章节
+4. 删除任何元评论 (如"以下是报告...")
 
-Strictly enforce this document structure:
+严格执行以下文档结构:
 
-## Company Overview
-[Company content with ### subsections]
+## 事件概述
+[事件内容]
 
-## Industry Overview
-[Industry content with ### subsections]
+## 可量化性评估
+[可量化性内容，使用 ### 子标题]
 
-## Financial Overview
-[Financial content with ### subsections]
+## 预言机与结算机制
+[预言机内容，使用 ### 子标题]
 
-## News
-[News content with ### subsections]
+## 市场需求分析
+[市场需求内容，使用 ### 子标题]
 
-## References
-[References in MLA format - PRESERVE EXACTLY AS PROVIDED]
+## 合规与风险评估
+[合规风险内容，使用 ### 子标题]
 
-Critical rules:
-1. The document MUST start with "# {company} Research Report"
-2. The document MUST ONLY use these exact ## headers in this order:
-   - ## Company Overview
-   - ## Industry Overview
-   - ## Financial Overview
-   - ## News
-   - ## References
-3. NO OTHER ## HEADERS ARE ALLOWED
-4. Use ### for subsections in Company/Industry/Financial sections
-5. News section should only use bullet points (*), never headers
-6. Never use code blocks (```)
-7. Never use more than one blank line between sections
-8. Format all bullet points with *
-9. Add one blank line before and after each section/list
-10. DO NOT CHANGE the format of the references section
+## 综合结论
+[结论内容，使用 ### 子标题]
 
-Return the polished report in flawless markdown format. No explanation.
+## 参考资料
+[保持 MLA 格式的参考文献 - 完全保留]
 
-Return the cleaned report in flawless markdown format. No explanations or commentary."""
+关键规则:
+1. 文档必须以 "# {topic} 事件期货可行性报告" 开头
+2. 文档只能使用以上 ## 标题，按此顺序
+3. 不允许使用其他 ## 标题
+4. 使用 ### 作为子标题
+5. 不要使用代码块 (```)
+6. 章节之间不要超过一个空行
+7. 所有要点使用 * 格式
+8. 不要修改参考资料章节的格式
+
+返回格式完美的 Markdown 报告。不要解释。"""
 
 
 # ============================================================================
-# RESEARCH QUERY GENERATION PROMPTS
+# RESEARCH QUERY GENERATION PROMPTS - 搜索查询生成
 # ============================================================================
 
-COMPANY_ANALYZER_QUERY_PROMPT = """Generate queries on the company fundamentals of {company} in the {industry} industry such as:
-- Core products and services
-- Company history and milestones
-- Leadership team
-- Business model and strategy
+QUANTIFIABILITY_QUERY_PROMPT = """针对事件"{topic}"生成可量化性分析的搜索查询:
+- 事件的官方定义和标准
+- 事件的判断标准和指标
+- 类似事件的量化案例
+- 事件结果的可能类型
 """
 
-FINANCIAL_ANALYZER_QUERY_PROMPT = """Generate queries on the financial analysis of {company} in the {industry} industry such as:
-- Fundraising history and valuation
-- Financial statements and key metrics
-- Revenue and profit sources
+ORACLE_QUERY_PROMPT = """针对事件"{topic}"生成预言机与结算机制的搜索查询:
+- 官方数据发布渠道和机构
+- 历史数据发布的时间和可靠性
+- 第三方验证数据源
+- 争议解决机制
 """
 
-INDUSTRY_ANALYZER_QUERY_PROMPT = """Generate queries on the industry analysis of {company} in the {industry} industry such as:
-- Market position
-- Competitors
-- {industry} industry trends and challenges
-- Market size and growth
+MARKET_DEMAND_QUERY_PROMPT = """针对事件"{topic}"生成市场需求分析的搜索查询:
+- 预测市场上类似事件的交易量
+- 公众对该事件的关注度
+- 投资者/交易者对该事件的兴趣
+- Polymarket Kalshi PredictIt 类似合约
 """
 
-NEWS_SCANNER_QUERY_PROMPT = """Generate queries on the recent news coverage of {company} such as:
-- Recent company announcements
-- Press releases
-- New partnerships
+COMPLIANCE_RISK_QUERY_PROMPT = """针对事件"{topic}"生成合规风险分析的搜索查询:
+- 该类事件在预测市场的法律状态
+- 监管机构对类似合约的态度
+- 伦理争议和公众反应
+- 市场操纵和内幕交易风险
 """
 
 QUERY_FORMAT_GUIDELINES = """
-Important Guidelines:
-- Focus ONLY on {company}-specific information
-- Make queries very brief and to the point
-- Provide exactly 4 search queries (one per line), with no hyphens or dashes
-- DO NOT make assumptions about the industry - use only the provided industry information"""
+重要指南:
+- 只关注与"{topic}"直接相关的信息
+- 查询要简洁明了
+- 提供恰好 4 条搜索查询 (每行一条)，不使用连字符或破折号
+- 不要假设事件细节，只使用提供的信息"""

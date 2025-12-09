@@ -63,19 +63,19 @@ class Enricher:
         return raw_contents
 
     async def enrich_data(self, state: ResearchState) -> ResearchState:
-        """Enrich curated documents with raw content."""
-        company = state.get('company', 'Unknown Company')
+        """使用原始内容丰富筛选后的文档。"""
+        topic = state.get('topic', 'Unknown Topic')
         job_id = state.get('job_id')
 
-        logger.info(f"Starting enrichment for company: {company}, job_id={job_id}")
-        msg = [f"📚 Enriching curated data for {company}:"]
+        logger.info(f"Starting enrichment for topic: {topic}, job_id={job_id}")
+        msg = [f"📚 丰富筛选数据: {topic}:"]
 
         # Process each type of curated data
         data_types = {
-            'financial_data': '💰 Financial',
-            'news_data': '📰 News',
-            'industry_data': '🏭 Industry',
-            'company_data': '🏢 Company'
+            'quantifiability_data': '📐 可量化性',
+            'oracle_data': '🔮 预言机',
+            'market_demand_data': '📊 市场需求',
+            'compliance_risk_data': '⚖️ 合规风险'
         }
 
         # Create tasks for parallel processing
@@ -85,7 +85,7 @@ class Enricher:
             curated_docs = state.get(curated_field, {})
             
             if not curated_docs:
-                msg.append(f"\n• No curated {label} documents to enrich")
+                msg.append(f"\n• 无 {label} 文档需要丰富")
                 continue
 
             # Find documents needing enrichment
@@ -93,13 +93,13 @@ class Enricher:
                                   if not doc.get('raw_content')}
             
             if not docs_needing_content:
-                msg.append(f"\n• All {label} documents already have raw content")
+                msg.append(f"\n• 所有 {label} 文档已有原始内容")
                 continue
             
-            msg.append(f"\n• Enriching {len(docs_needing_content)} {label} documents...")
+            msg.append(f"\n• 正在丰富 {len(docs_needing_content)} 份 {label} 文档...")
 
-            # Extract category name from field (e.g., 'curated_financial_data' -> 'financial')
-            category = curated_field.replace('curated_', '').replace('_data', '')
+            # Extract category name from field
+            category = data_field.replace('_data', '')
             
             enrichment_tasks.append({
                 'field': curated_field,
@@ -115,7 +115,7 @@ class Enricher:
                 if job_id in job_status:
                     job_status[job_id]["events"].append({
                         "type": "enrichment",
-                        "message": f"Enriching {len(enrichment_tasks)} categories"
+                        "message": f"正在丰富 {len(enrichment_tasks)} 个类别"
                     })
             except Exception as e:
                 logger.error(f"Error appending enrichment event: {e}")
@@ -155,7 +155,7 @@ class Enricher:
             
             # Add summary to message and emit enrichment completion events
             for result in results:
-                msg.append(f"\n  ✓ {result['label']}: {result['enriched']}/{result['total']} documents enriched")
+                msg.append(f"\n  ✓ {result['label']}: {result['enriched']}/{result['total']} 份文档已丰富")
                 
                 # Emit enrichment completion event for each category
                 if job_id:
@@ -163,10 +163,10 @@ class Enricher:
                         if job_id in job_status:
                             job_status[job_id]["events"].append({
                                 "type": "enrichment",
-                                "category": result['category'],  # Use category instead of label
+                                "category": result['category'],
                                 "enriched": result['enriched'],
                                 "total": result['total'],
-                                "message": f"Enriched {result['enriched']}/{result['total']} {result['label']} documents"
+                                "message": f"已丰富 {result['enriched']}/{result['total']} 份 {result['label']} 文档"
                             })
                     except Exception as e:
                         logger.error(f"Error appending enrichment completion event: {e}")

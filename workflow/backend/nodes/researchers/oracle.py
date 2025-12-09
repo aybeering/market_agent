@@ -1,35 +1,34 @@
-from typing import Any
-
-
 from langchain_core.messages import AIMessage
 
 from ...classes import ResearchState
-from ...prompts import NEWS_SCANNER_QUERY_PROMPT
+from ...prompts import ORACLE_QUERY_PROMPT
 from .base import BaseResearcher
 
 
-class NewsScanner(BaseResearcher):
+class OracleAnalyzer(BaseResearcher):
+    """分析预言机与结算机制：可信数据源和结算可靠性"""
+    
     def __init__(self) -> None:
         super().__init__()
-        self.analyst_type = "news_analyzer"
-
+        self.analyst_type = "oracle_analyzer"
+    
     async def analyze(self, state: ResearchState):
-        """Analyze news and yield events"""
-        company = state.get('company', 'Unknown Company')
+        """分析预言机和结算机制并生成事件"""
+        topic = state.get('topic', 'Unknown Topic')
         
         # Generate search queries and yield events
         queries = []
-        async for event in self.generate_queries(state, NEWS_SCANNER_QUERY_PROMPT):
+        async for event in self.generate_queries(state, ORACLE_QUERY_PROMPT):
             yield event
             if event.get("type") == "queries_complete":
                 queries = event.get("queries", [])
         
         # Log subqueries
-        subqueries_msg = "🔍 Subqueries for news analysis:\n" + "\n".join([f"• {query}" for query in queries])
+        subqueries_msg = "🔍 预言机分析子查询:\n" + "\n".join([f"• {query}" for query in queries])
         state.setdefault('messages', []).append(AIMessage(content=subqueries_msg))
         
-        # Start with site scrape data
-        news_data = dict[str, Any](state.get('site_scrape', {}))
+        # Start with event background data
+        oracle_data = dict(state.get('event_background', {}))
         
         # Search and merge documents, yielding events
         documents = {}
@@ -38,21 +37,21 @@ class NewsScanner(BaseResearcher):
             if event.get("type") == "search_complete":
                 documents = event.get("merged_docs", {})
         
-        news_data.update(documents)
+        oracle_data.update(documents)
         
         # Update state
-        completion_msg = f"📰 News Scanner found {len(news_data)} documents for {company}"
+        completion_msg = f"🔮 预言机分析找到 {len(oracle_data)} 份文档，事件: {topic}"
         state.setdefault('messages', []).append(AIMessage(content=completion_msg))
-        state['news_data'] = news_data
+        state['oracle_data'] = oracle_data
         
-        yield {"type": "analysis_complete", "data_type": "news_data", "count": len(news_data)}
-        yield {'message': [completion_msg], 'news_data': news_data}
+        yield {"type": "analysis_complete", "data_type": "oracle_data", "count": len(oracle_data)}
+        yield {'message': [completion_msg], 'oracle_data': oracle_data}
 
     async def run(self, state: ResearchState):
         """Run analysis and yield all events"""
         result = None
         async for event in self.analyze(state):
             yield event
-            if "message" in event or "news_data" in event:
+            if "message" in event or "oracle_data" in event:
                 result = event
-        yield result or {} 
+        yield result or {}

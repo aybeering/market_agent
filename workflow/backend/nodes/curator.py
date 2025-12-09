@@ -63,25 +63,25 @@ class Curator:
         return evaluated_docs
 
     async def curate_data(self, state: ResearchState) -> ResearchState:
-        """Curate all collected data based on Tavily scores."""
-        company = state.get('company', 'Unknown Company')
+        """基于 Tavily 评分筛选所有收集的数据。"""
+        topic = state.get('topic', 'Unknown Topic')
         job_id = state.get('job_id')
-        logger.info(f"Starting curation for company: {company}, job_id={job_id}")
+        logger.info(f"Starting curation for topic: {topic}, job_id={job_id}")
 
-        industry = state.get('industry', 'Unknown')
+        event_category = state.get('event_category', 'Unknown')
         context = {
-            "company": company,
-            "industry": industry,
-            "hq_location": state.get('hq_location', 'Unknown')
+            "topic": topic,
+            "event_category": event_category,
+            "target_date": state.get('target_date', 'Unknown')
         }
 
-        msg = [f"🔍 Curating research data for {company}"]
+        msg = [f"🔍 筛选事件分析数据: {topic}"]
         
         data_types = {
-            'financial_data': ('💰 Financial', 'financial'),
-            'news_data': ('📰 News', 'news'),
-            'industry_data': ('🏭 Industry', 'industry'),
-            'company_data': ('🏢 Company', 'company')
+            'quantifiability_data': ('📐 可量化性', 'quantifiability'),
+            'oracle_data': ('🔮 预言机', 'oracle'),
+            'market_demand_data': ('📊 市场需求', 'market_demand'),
+            'compliance_risk_data': ('⚖️ 合规风险', 'compliance_risk')
         }
 
         # Process each data type
@@ -106,7 +106,7 @@ class Curator:
                     continue
 
             docs = list(unique_docs.values())
-            msg.append(f"\n{emoji}: Found {len(docs)} documents")
+            msg.append(f"\n{emoji}: 找到 {len(docs)} 份文档")
             
             evaluated_docs = self.evaluate_documents(docs, context)
             
@@ -118,13 +118,13 @@ class Curator:
                             "type": "curation",
                             "category": doc_type,
                             "total": len(evaluated_docs) if evaluated_docs else 0,
-                            "message": f"Curating {doc_type} documents"
+                            "message": f"筛选 {doc_type} 文档"
                         })
                 except Exception as e:
                     logger.error(f"Error appending curation event: {e}")
 
             if not evaluated_docs:
-                msg.append("  ⚠️ No relevant documents found")
+                msg.append("  ⚠️ 未找到相关文档")
                 continue
 
             # Filter and sort by Tavily score
@@ -137,10 +137,10 @@ class Curator:
             relevant_docs = dict(sorted_items)
 
             if relevant_docs:
-                msg.append(f"  ✓ Kept {len(relevant_docs)} relevant documents")
+                msg.append(f"  ✓ 保留 {len(relevant_docs)} 份相关文档")
                 logger.info(f"Kept {len(relevant_docs)} documents for {doc_type} with scores above threshold")
             else:
-                msg.append("  ⚠️ No documents met relevance threshold")
+                msg.append("  ⚠️ 没有文档达到相关性阈值")
                 logger.info(f"No documents met relevance threshold for {doc_type}")
 
             # Store curated documents in state

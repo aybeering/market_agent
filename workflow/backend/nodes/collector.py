@@ -4,27 +4,27 @@ from ..classes import ResearchState
 
 
 class Collector:
-    """Collects and organizes all research data before curation."""
+    """收集和整理所有分析数据。"""
 
     async def collect(self, state: ResearchState) -> ResearchState:
-        """Collect and verify all research data is present."""
-        company = state.get('company', 'Unknown Company')
-        msg = [f"📦 Collecting research data for {company}:"]
+        """收集并验证所有分析数据。"""
+        topic = state.get('topic', 'Unknown Topic')
+        msg = [f"📦 收集事件分析数据: {topic}:"]
         
-        # Check each type of research data
-        research_types = {
-            'financial_data': '💰 Financial',
-            'news_data': '📰 News',
-            'industry_data': '🏭 Industry',
-            'company_data': '🏢 Company'
+        # Check each type of analysis data
+        analysis_types = {
+            'quantifiability_data': '📐 可量化性',
+            'oracle_data': '🔮 预言机',
+            'market_demand_data': '📊 市场需求',
+            'compliance_risk_data': '⚖️ 合规风险'
         }
         
-        for data_field, label in research_types.items():
+        for data_field, label in analysis_types.items():
             data = state.get(data_field, {})
             if data:
-                msg.append(f"• {label}: {len(data)} documents collected")
+                msg.append(f"• {label}: 收集到 {len(data)} 份文档")
             else:
-                msg.append(f"• {label}: No data found")
+                msg.append(f"• {label}: 未找到数据")
         
         # Update state with collection message
         state.setdefault('messages', []).append(AIMessage(content="\n".join(msg)))

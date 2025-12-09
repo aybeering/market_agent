@@ -46,117 +46,53 @@ class BaseResearcher:
 
     async def generate_queries(self, state: Dict, prompt: str):
         """Generate search queries and yield events as they're created"""
-        company = state.get("company", "Unknown Company")
-        industry = state.get("industry", "Unknown Industry")
-        hq_location = state.get("hq_location", "Unknown")
+        topic = state.get("topic", "Unknown Topic")
+        event_category = state.get("event_category", "Unknown Category")
+        target_date = state.get("target_date", "Unknown")
         current_year = datetime.now().year
         job_id = state.get("job_id")
         
-        logger.info(f"=== GENERATE_QUERIES START: job_id={job_id}, analyst={self.analyst_type} ===")
-        if not job_id:
-            logger.warning(f"⚠️ NO JOB_ID in state! Keys: {list(state.keys())}")
+        logger.info(f"=== GENERATE_QUERIES START: analyst={self.analyst_type} ===")
         
         try:
-            logger.info(f"Generating queries for {company} as {self.analyst_type}, job_id={job_id}")
-            
             # Create prompt template using LangChain
             query_prompt = ChatPromptTemplate.from_messages([
-                ("system", "You are researching {company}, a company in the {industry} industry, headquartered in {hq_location}."),
-                ("user", """Researching {company} in {year}, as of {date}.
+                ("system", "你正在研究事件'{topic}'，这是一个{event_category}类别的事件，预期结算日期为{target_date}。"),
+                ("user", """研究事件 {topic}，当前时间 {year}年，日期 {date}。
 {task_prompt}
 {format_guidelines}""")
             ])
             
-            # Create LCEL chain
+            # Create LCEL chain and invoke (non-streaming for speed)
             chain = query_prompt | self.llm
             
-            queries = []
-            current_query = ""
-            current_query_number = 1
-
-            # Stream queries using LangChain's astream
-            async for chunk in chain.astream({
-                "company": company,
-                "industry": industry,
-                "hq_location": hq_location,
+            result = await chain.ainvoke({
+                "topic": topic,
+                "event_category": event_category,
+                "target_date": target_date,
                 "year": current_year,
-                "date": datetime.now().strftime("%B %d, %Y"),
+                "date": datetime.now().strftime("%Y年%m月%d日"),
                 "task_prompt": prompt,
-                "format_guidelines": QUERY_FORMAT_GUIDELINES.format(company=company)
-            }):
-                current_query += chunk.content
-                
-                # Yield query generation progress
-                event = {
-                    "type": "query_generating",
-                    "query": current_query,
-                    "query_number": current_query_number,
-                    "category": self.analyst_type
-                }
-                
-                # Update job status if job_id provided
-                if job_id:
-                    try:
-                        logger.info(f"job_id={job_id}, job_id in job_status={job_id in job_status}")
-                        if job_id in job_status:
-                            job_status[job_id]["events"].append(event)
-
-                        else:
-                            logger.warning(f"job_id {job_id} not found in job_status. Available keys: {list(job_status.keys())[:3]}")
-                    except Exception as e:
-                        logger.error(f"Error appending event: {e}")
-                
-                yield event
-                
-                # Parse completed queries on newline
-                if '\n' in current_query:
-                    parts = current_query.split('\n')
-                    current_query = parts[-1]
-                    
-                    for query in parts[:-1]:
-                        query = query.strip()
-                        if query:
-                            queries.append(query)
-                            event = {
-                                "type": "query_generated",
-                                "query": query,
-                                "query_number": len(queries),
-                                "category": self.analyst_type
-                            }
-                            
-                            # Update job status if job_id provided
-                            if job_id:
-                                try:
-                                    if job_id in job_status:
-                                        job_status[job_id]["events"].append(event)
-                                    else:
-                                        logger.warning(f"job_id {job_id} not found in job_status for query_generated")
-                                except Exception as e:
-                                    logger.error(f"Error appending query_generated event: {e}")
-                            
-                            yield event
-                            current_query_number += 1
-
-            # Add remaining query
-            if current_query.strip():
-                queries.append(current_query.strip())
-                yield {
-                    "type": "query_generated",
-                    "query": current_query.strip(),
-                    "query_number": len(queries),
-                    "category": self.analyst_type
-                }
+                "format_guidelines": QUERY_FORMAT_GUIDELINES.format(topic=topic)
+            })
+            
+            # Parse queries from response
+            queries = [q.strip() for q in result.content.strip().split('\n') if q.strip()]
             
             if not queries:
-                raise ValueError(f"No queries generated for {company}")
+                raise ValueError(f"No queries generated for {topic}")
 
-            queries = queries[:4]  # Limit to 4 queries
-            logger.info(f"Final queries for {self.analyst_type}: {queries}")
+            queries = queries[:2]  # Limit to 2 queries for speed
+            logger.info(f"Generated {len(queries)} queries for {self.analyst_type}")
+            
+            # Yield final result
+            for i, query in enumerate(queries, 1):
+                yield {"type": "query_generated", "query": query, "query_number": i, "category": self.analyst_type}
             
             yield {"type": "queries_complete", "queries": queries, "count": len(queries)}
             
         except Exception as e:
-            logger.error(f"Error generating queries for {company}: {e}")
+            logger.error(f"Error generating queries for {topic}: {e}")
             raise RuntimeError(f"Fatal API error - query generation failed: {str(e)}") from e
 
     def _get_search_params(self) -> Dict[str, Any]:
@@ -164,7 +100,7 @@ class BaseResearcher:
         params = {
             "search_depth": "basic",
             "include_raw_content": False,
-            "max_results": 5
+            "max_results": 3  # Reduced for speed
         }
         
         topic_map = {

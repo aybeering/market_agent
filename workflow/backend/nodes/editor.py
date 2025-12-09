@@ -20,7 +20,7 @@ from ..prompts import (
 logger = logging.getLogger(__name__)
 
 class Editor:
-    """Compiles individual section briefings into a cohesive final report."""
+    """将各维度简报编译成完整的事件期货可行性报告。"""
     
     def __init__(self) -> None:
         openai_key = os.getenv("OPENAI_API_KEY")
@@ -39,24 +39,24 @@ class Editor:
         
         # Initialize context dictionary
         self.context = {
-            "company": "Unknown Company",
-            "industry": "Unknown",
-            "hq_location": "Unknown"
+            "topic": "Unknown Topic",
+            "event_category": "Unknown",
+            "target_date": "Unknown"
         }
 
     async def compile_briefings(self, state: ResearchState) -> ResearchState:
-        """Compile individual briefing categories from state into a final report."""
-        company = state.get('company', 'Unknown Company')
+        """将各维度简报编译成最终的可行性报告。"""
+        topic = state.get('topic', 'Unknown Topic')
         job_id = state.get('job_id')
         
         # Update context with values from state
         self.context = {
-            "company": company,
-            "industry": state.get('industry', 'Unknown'),
-            "hq_location": state.get('hq_location', 'Unknown')
+            "topic": topic,
+            "event_category": state.get('event_category', 'Unknown'),
+            "target_date": state.get('target_date', 'Unknown')
         }
         
-        msg = [f"📑 Compiling final report for {company}..."]
+        msg = [f"📑 正在编译事件期货可行性报告: {topic}..."]
         
         # Emit report compilation start event
         if job_id:
@@ -64,30 +64,30 @@ class Editor:
                 if job_id in job_status:
                     job_status[job_id]["events"].append({
                         "type": "report_compilation",
-                        "message": f"Compiling final report for {company}"
+                        "message": f"正在编译可行性报告: {topic}"
                     })
             except Exception as e:
                 logger.error(f"Error appending report_compilation event: {e}")
         
         # Pull individual briefings from dedicated state keys
         briefing_keys = {
-            'company': 'company_briefing',
-            'industry': 'industry_briefing',
-            'financial': 'financial_briefing',
-            'news': 'news_briefing'
+            'quantifiability': 'quantifiability_briefing',
+            'oracle': 'oracle_briefing',
+            'market_demand': 'market_demand_briefing',
+            'compliance_risk': 'compliance_risk_briefing'
         }
 
         individual_briefings = {}
         for category, key in briefing_keys.items():
             if content := state.get(key):
                 individual_briefings[category] = content
-                msg.append(f"Found {category} briefing ({len(content)} characters)")
+                msg.append(f"找到 {category} 简报 ({len(content)} 字符)")
             else:
-                msg.append(f"No {category} briefing available")
+                msg.append(f"无 {category} 简报")
                 logger.error(f"Missing state key: {key}")
         
         if not individual_briefings:
-            msg.append("\n⚠️ No briefing sections available to compile")
+            msg.append("\n⚠️ 没有可用的简报章节进行编译")
             logger.error("No briefings found in state")
         else:
             try:
@@ -103,7 +103,7 @@ class Editor:
         return state
     
     async def edit_report(self, state: ResearchState, briefings: Dict[str, str]) -> str:
-        """Compile section briefings into a final report and update the state."""
+        """编译各维度简报生成最终报告并更新状态。"""
         try:
             logger.info("Starting report compilation")
             job_id = state.get('job_id')
@@ -150,7 +150,7 @@ class Editor:
             return ""
     
     async def compile_content(self, state: ResearchState, briefings: Dict[str, str]) -> str:
-        """Initial compilation of research sections using LCEL."""
+        """使用 LCEL 进行初始编译。"""
         combined_content = "\n\n".join(content for content in briefings.values())
         
         references = state.get('references', [])
@@ -172,9 +172,9 @@ class Editor:
         
         try:
             initial_report = await chain.ainvoke({
-                "company": self.context["company"],
-                "industry": self.context["industry"],
-                "hq_location": self.context["hq_location"],
+                "topic": self.context["topic"],
+                "event_category": self.context["event_category"],
+                "target_date": self.context["target_date"],
                 "combined_content": combined_content
             })
             
@@ -188,7 +188,7 @@ class Editor:
             return combined_content or ""
         
     async def content_sweep(self, content: str):
-        """Sweep the content for any redundant information using LCEL streaming and yield events."""
+        """使用 LCEL 流式输出清理内容中的冗余信息。"""
         # Create LCEL chain for content sweep
         sweep_prompt = ChatPromptTemplate.from_messages([
             ("system", CONTENT_SWEEP_SYSTEM_MESSAGE),
@@ -203,16 +203,16 @@ class Editor:
             
             # Stream using LangChain's astream
             async for chunk in chain.astream({
-                "company": self.context["company"],
-                "industry": self.context["industry"],
-                "hq_location": self.context["hq_location"],
+                "topic": self.context["topic"],
+                "event_category": self.context["event_category"],
+                "target_date": self.context["target_date"],
                 "content": content
             }):
                 accumulated_text += chunk
                 buffer += chunk
                 
                 # Yield chunks at sentence boundaries
-                if any(char in buffer for char in ['.', '!', '?', '\n']) and len(buffer) > 10:
+                if any(char in buffer for char in ['.', '!', '?', '\n', '。', '！', '？']) and len(buffer) > 10:
                     yield {"type": "report_chunk", "chunk": buffer, "step": "Editor"}
                     buffer = ""
             

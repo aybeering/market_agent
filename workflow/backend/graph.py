@@ -12,25 +12,25 @@ from .nodes.curator import Curator
 from .nodes.editor import Editor
 from .nodes.enricher import Enricher
 from .nodes.researchers import (
-    CompanyAnalyzer,
-    FinancialAnalyst,
-    IndustryAnalyzer,
-    NewsScanner,
+    QuantifiabilityAnalyzer,
+    OracleAnalyzer,
+    MarketDemandAnalyzer,
+    ComplianceRiskAnalyzer,
 )
 
 logger = logging.getLogger(__name__)
 
 class Graph:
-    def __init__(self, company=None, url=None, hq_location=None, industry=None, job_id=None):
-        # Initialize InputState
+    def __init__(self, topic=None, event_description=None, event_category=None, target_date=None, job_id=None):
+        # Initialize InputState for Event Futures Feasibility Analysis
         self.input_state = InputState(
-            company=company,
-            company_url=url,
-            hq_location=hq_location,
-            industry=industry,
+            topic=topic,
+            event_description=event_description,
+            event_category=event_category,
+            target_date=target_date,
             job_id=job_id,
             messages=[
-                SystemMessage(content="Expert researcher starting investigation")
+                SystemMessage(content="开始事件期货可行性分析")
             ]
         )
 
@@ -41,10 +41,10 @@ class Graph:
     def _init_nodes(self):
         """Initialize all workflow nodes"""
         self.ground = GroundingNode()
-        self.financial_analyst = FinancialAnalyst()
-        self.news_scanner = NewsScanner()
-        self.industry_analyst = IndustryAnalyzer()
-        self.company_analyst = CompanyAnalyzer()
+        self.quantifiability_analyzer = QuantifiabilityAnalyzer()
+        self.oracle_analyzer = OracleAnalyzer()
+        self.market_demand_analyzer = MarketDemandAnalyzer()
+        self.compliance_risk_analyzer = ComplianceRiskAnalyzer()
         self.collector = Collector()
         self.curator = Curator()
         self.enricher = Enricher()
@@ -57,10 +57,10 @@ class Graph:
         
         # Add nodes with their respective processing functions
         self.workflow.add_node("grounding", self.ground.run)
-        self.workflow.add_node("financial_analyst", self.financial_analyst.run)
-        self.workflow.add_node("news_scanner", self.news_scanner.run)
-        self.workflow.add_node("industry_analyst", self.industry_analyst.run)
-        self.workflow.add_node("company_analyst", self.company_analyst.run)
+        self.workflow.add_node("quantifiability_analyzer", self.quantifiability_analyzer.run)
+        self.workflow.add_node("oracle_analyzer", self.oracle_analyzer.run)
+        self.workflow.add_node("market_demand_analyzer", self.market_demand_analyzer.run)
+        self.workflow.add_node("compliance_risk_analyzer", self.compliance_risk_analyzer.run)
         self.workflow.add_node("collector", self.collector.run)
         self.workflow.add_node("curator", self.curator.run)
         self.workflow.add_node("enricher", self.enricher.run)
@@ -71,26 +71,27 @@ class Graph:
         self.workflow.set_entry_point("grounding")
         self.workflow.set_finish_point("editor")
         
-        research_nodes = [
-            "financial_analyst", 
-            "news_scanner",
-            "industry_analyst", 
-            "company_analyst"
+        # Four parallel analysis nodes
+        analysis_nodes = [
+            "quantifiability_analyzer",   # 可量化性分析
+            "oracle_analyzer",            # 预言机分析
+            "market_demand_analyzer",     # 市场需求分析
+            "compliance_risk_analyzer"    # 合规风险分析
         ]
 
-        # Connect grounding to all research nodes
-        for node in research_nodes:
+        # Connect grounding to all analysis nodes (fan-out)
+        for node in analysis_nodes:
             self.workflow.add_edge("grounding", node)
             self.workflow.add_edge(node, "collector")
 
-        # Connect remaining nodes
+        # Connect remaining nodes (sequential pipeline)
         self.workflow.add_edge("collector", "curator")
         self.workflow.add_edge("curator", "enricher")
         self.workflow.add_edge("enricher", "briefing")
         self.workflow.add_edge("briefing", "editor")
 
     async def run(self, thread: Dict[str, Any]) -> AsyncIterator[Dict[str, Any]]:
-        """Execute the research workflow"""
+        """Execute the feasibility analysis workflow"""
         compiled_graph = self.workflow.compile()
         
         async for state in compiled_graph.astream(

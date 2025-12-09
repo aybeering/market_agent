@@ -10,23 +10,23 @@ from ..classes.state import job_status
 logger = logging.getLogger(__name__)
 
 class GroundingNode:
-    """Gathers initial grounding data about the company."""
+    """解析事件话题，收集事件背景信息。"""
     
     def __init__(self) -> None:
         self.tavily_client = AsyncTavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 
     async def initial_search(self, state: InputState):
-        """Initial search and yield events"""
-        company = state.get('company', 'Unknown Company')
+        """初始搜索事件背景信息并生成事件"""
+        topic = state.get('topic', 'Unknown Topic')
         job_id = state.get('job_id')
-        msg = f"🎯 Initiating research for {company}...\n"
+        msg = f"🎯 开始分析事件: {topic}...\n"
         
         # Emit initialization event
         event = {
             "type": "research_init",
-            "company": company,
-            "message": f"Initiating research for {company}",
-            "step": "Initializing"
+            "topic": topic,
+            "message": f"开始分析事件: {topic}",
+            "step": "初始化"
         }
         
         if job_id:
@@ -38,122 +38,112 @@ class GroundingNode:
         
         yield event
 
-        site_scrape = {}
+        event_background = {}
 
-        # Only attempt extraction if we have a URL
-        if url := state.get('company_url'):
-            msg += f"\n🌐 Crawling company website: {url}"
-            logger.info(f"Starting website analysis for {url}")
-            
-            # Emit crawl start event
-            event = {
-                "type": "crawl_start",
-                "url": url,
-                "message": f"Crawling company website: {url}",
-                "step": "Website Crawl"
-            }
-            
-            if job_id:
-                try:
-                    if job_id in job_status:
-                        job_status[job_id]["events"].append(event)
-                except Exception as e:
-                    logger.error(f"Error appending crawl_start event: {e}")
-            
-            yield event
-
+        # 搜索事件背景信息
+        msg += f"\n🔍 搜索事件背景: {topic}"
+        logger.info(f"Starting event background search for {topic}")
+        
+        # Emit search start event
+        event = {
+            "type": "background_search_start",
+            "topic": topic,
+            "message": f"搜索事件背景信息: {topic}",
+            "step": "事件背景搜索"
+        }
+        
+        if job_id:
             try:
-                logger.info("Initiating Tavily crawl")
-                site_extraction = await self.tavily_client.crawl(
-                    url=url, 
-                    instructions="Find any pages that will help us understand the company's business, products, services, and any other relevant information.",
-                    max_depth=1, 
-                    max_breadth=50, 
-                    extract_depth="advanced"
-                )
-                
-                site_scrape = {}
-                for item in site_extraction.get("results", []):
-                    if item.get("raw_content"):
-                        page_url = item.get("url", url)
-                        site_scrape[page_url] = {
-                            'raw_content': item.get('raw_content'),
-                            'source': 'company_website'
-                        }
-                
-                if site_scrape:
-                    logger.info(f"Successfully crawled {len(site_scrape)} pages from website")
-                    msg += f"\n✅ Successfully crawled {len(site_scrape)} pages from website"
-                    yield {
-                        "type": "crawl_success",
-                        "pages_found": len(site_scrape),
-                        "message": f"Successfully crawled {len(site_scrape)} pages from website",
-                        "step": "Initial Site Scrape"
-                    }
-                else:
-                    logger.warning("No content found in crawl results")
-                    msg += "\n⚠️ No content found in website crawl"
-                    yield {
-                        "type": "crawl_warning",
-                        "message": "⚠️ No content found in provided URL",
-                        "step": "Initial Site Scrape"
-                    }
+                if job_id in job_status:
+                    job_status[job_id]["events"].append(event)
             except Exception as e:
-                error_str = str(e)
-                logger.error(f"Website crawl error: {error_str}", exc_info=True)
-                error_msg = f"⚠️ Error crawling website content: {error_str}"
-                msg += f"\n{error_msg}"
+                logger.error(f"Error appending background_search_start event: {e}")
+        
+        yield event
+
+        try:
+            logger.info("Initiating Tavily search for event background")
+            
+            # 搜索事件基本信息
+            search_result = await self.tavily_client.search(
+                query=f"{topic} 事件详情 背景",
+                search_depth="basic",  # Changed from advanced for speed
+                max_results=5  # Reduced from 10 for speed
+            )
+            
+            for item in search_result.get("results", []):
+                if item.get("content"):
+                    url = item.get("url", "")
+                    event_background[url] = {
+                        'title': item.get('title', ''),
+                        'content': item.get('content', ''),
+                        'url': url,
+                        'source': 'background_search',
+                        'score': item.get('score', 0.0)
+                    }
+            
+            if event_background:
+                logger.info(f"Successfully found {len(event_background)} background documents")
+                msg += f"\n✅ 找到 {len(event_background)} 份背景文档"
                 yield {
-                    "type": "crawl_error",
-                    "error": error_str,
-                    "message": error_msg,
-                    "step": "Initial Site Scrape",
-                    "continue_research": True
+                    "type": "background_search_success",
+                    "docs_found": len(event_background),
+                    "message": f"找到 {len(event_background)} 份背景文档",
+                    "step": "事件背景搜索"
                 }
-        else:
-            msg += "\n⏩ No company URL provided, proceeding directly to research phase"
+            else:
+                logger.warning("No background content found")
+                msg += "\n⚠️ 未找到背景信息"
+                yield {
+                    "type": "background_search_warning",
+                    "message": "⚠️ 未找到事件背景信息",
+                    "step": "事件背景搜索"
+                }
+        except Exception as e:
+            error_str = str(e)
+            logger.error(f"Background search error: {error_str}", exc_info=True)
+            error_msg = f"⚠️ 搜索事件背景时出错: {error_str}"
+            msg += f"\n{error_msg}"
             yield {
-                "type": "no_url",
-                "message": "No company URL provided, proceeding directly to research phase",
-                "step": "Initializing"
+                "type": "background_search_error",
+                "error": error_str,
+                "message": error_msg,
+                "step": "事件背景搜索",
+                "continue_research": True
             }
+
         # Add context about what information we have
         context_data = {}
-        if hq := state.get('hq_location'):
-            msg += f"\n📍 Company HQ: {hq}"
-            context_data["hq_location"] = hq
-        if industry := state.get('industry'):
-            msg += f"\n🏭 Industry: {industry}"
-            context_data["industry"] = industry
+        if event_category := state.get('event_category'):
+            msg += f"\n📂 事件类别: {event_category}"
+            context_data["event_category"] = event_category
+        if target_date := state.get('target_date'):
+            msg += f"\n📅 预期结算日期: {target_date}"
+            context_data["target_date"] = target_date
+        if event_description := state.get('event_description'):
+            msg += f"\n📝 事件描述: {event_description[:100]}..."
+            context_data["event_description"] = event_description
         
         # Initialize ResearchState with input information
         research_state = {
             # Copy input fields
-            "company": state.get('company'),
-            "company_url": state.get('company_url'),
-            "hq_location": state.get('hq_location'),
-            "industry": state.get('industry'),
+            "topic": state.get('topic'),
+            "event_description": state.get('event_description'),
+            "event_category": state.get('event_category'),
+            "target_date": state.get('target_date'),
             "job_id": state.get('job_id'),
             # Initialize research fields
             "messages": [AIMessage(content=msg)],
-            "site_scrape": site_scrape
+            "event_background": event_background
         }
 
-        # If there was an error in the initial crawl, store it in the state
-        if "⚠️ Error crawling website content:" in msg:
-            research_state["error"] = error_str
-
-        yield {"type": "grounding_complete", "site_pages": len(site_scrape)}
+        yield {"type": "grounding_complete", "background_docs": len(event_background)}
         yield research_state
 
     async def run(self, state: InputState) -> ResearchState:
         """Run grounding - note: for now returns directly, events can be captured if needed"""
-        # For compatibility, we call the generator but don't yield
-        # The calling code can be updated later to consume events
         result = None
         async for event in self.initial_search(state):
-            # The last yield should be the research_state (a dict with state fields)
-            # Earlier yields are event dicts with "type" field
             if isinstance(event, dict) and "type" not in event:
                 result = event
         return result if result else {}

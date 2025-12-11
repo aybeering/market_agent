@@ -10,9 +10,9 @@ from workflow.backend.graph import Graph
 async def test():
     start = time.time()
     g = Graph(
-        topic='WHO宣布新冠疫情结束', 
-        event_category='公共卫生', 
-        target_date='2025-12-31', 
+        topic='复仇者联盟9会不会上映', 
+        event_category='娱乐', 
+        target_date='', 
         job_id='speed-test-2'
     )
     thread = {'configurable': {'thread_id': 'speed-2'}}

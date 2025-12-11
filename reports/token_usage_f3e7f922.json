@@ -1,0 +1,115 @@
+{
+  "job_id": "f3e7f922",
+  "thread_id": null,
+  "start_time": "2025-12-10T17:09:48.131746",
+  "end_time": "2025-12-10T17:10:55.265474",
+  "duration_seconds": 67.1,
+  "total_calls": 9,
+  "total_input_tokens": 22907,
+  "total_output_tokens": 3509,
+  "total_tokens": 26416,
+  "total_cost_usd": 0.092357,
+  "by_node": {
+    "base_researcher": {
+      "calls": 4,
+      "prompt_tokens": 784,
+      "completion_tokens": 228,
+      "cost_usd": 0.004239
+    },
+    "briefing": {
+      "calls": 3,
+      "prompt_tokens": 19033,
+      "completion_tokens": 1332,
+      "cost_usd": 0.060902
+    },
+    "editor": {
+      "calls": 2,
+      "prompt_tokens": 3090,
+      "completion_tokens": 1949,
+      "cost_usd": 0.027215
+    }
+  },
+  "details": [
+    {
+      "timestamp": "2025-12-10T17:09:51.166791",
+      "node": "base_researcher",
+      "model": "gpt-4o",
+      "prompt_tokens": 201,
+      "completion_tokens": 50,
+      "total_tokens": 251,
+      "cost_usd": 0.001002
+    },
+    {
+      "timestamp": "2025-12-10T17:09:51.186947",
+      "node": "base_researcher",
+      "model": "gpt-4o",
+      "prompt_tokens": 199,
+      "completion_tokens": 59,
+      "total_tokens": 258,
+      "cost_usd": 0.001087
+    },
+    {
+      "timestamp": "2025-12-10T17:09:51.279730",
+      "node": "base_researcher",
+      "model": "gpt-4o",
+      "prompt_tokens": 193,
+      "completion_tokens": 64,
+      "total_tokens": 257,
+      "cost_usd": 0.001123
+    },
+    {
+      "timestamp": "2025-12-10T17:09:51.349328",
+      "node": "base_researcher",
+      "model": "gpt-4o",
+      "prompt_tokens": 191,
+      "completion_tokens": 55,
+      "total_tokens": 246,
+      "cost_usd": 0.001027
+    },
+    {
+      "timestamp": "2025-12-10T17:10:11.422923",
+      "node": "briefing",
+      "model": "gpt-4o",
+      "prompt_tokens": 11135,
+      "completion_tokens": 482,
+      "total_tokens": 11617,
+      "cost_usd": 0.032657
+    },
+    {
+      "timestamp": "2025-12-10T17:10:12.352248",
+      "node": "briefing",
+      "model": "gpt-4o",
+      "prompt_tokens": 1552,
+      "completion_tokens": 420,
+      "total_tokens": 1972,
+      "cost_usd": 0.00808
+    },
+    {
+      "timestamp": "2025-12-10T17:10:24.492283",
+      "node": "briefing",
+      "model": "gpt-4o",
+      "prompt_tokens": 6346,
+      "completion_tokens": 430,
+      "total_tokens": 6776,
+      "cost_usd": 0.020165
+    },
+    {
+      "timestamp": "2025-12-10T17:10:43.498101",
+      "node": "editor",
+      "model": "gpt-4o",
+      "prompt_tokens": 1755,
+      "completion_tokens": 965,
+      "total_tokens": 2720,
+      "cost_usd": 0.014038
+    },
+    {
+      "timestamp": "2025-12-10T17:10:55.251662",
+      "node": "editor",
+      "model": "gpt-4o",
+      "prompt_tokens": 1335,
+      "completion_tokens": 984,
+      "total_tokens": 2319,
+      "cost_usd": 0.013177
+    }
+  ]
+}

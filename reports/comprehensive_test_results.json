@@ -1,0 +1,387 @@
+{
+  "test_time": "2025-12-10T00:56:39.007758",
+  "total_topics": 15,
+  "success_count": 13,
+  "total_time_seconds": 901.4,
+  "avg_time_per_topic": 60.1,
+  "avg_tokens": 1161,
+  "results": [
+    {
+      "index": 1,
+      "topic": "2025年美联储降息至少3次",
+      "category": "经济/货币政策",
+      "status": "success",
+      "time_seconds": 68.2,
+      "report_length": 3039,
+      "estimated_tokens": 1543,
+      "scores": {
+        "quantifiability": 9.0,
+        "oracle": 9.0,
+        "market_demand": 9.0,
+        "compliance_risk": 7.0,
+        "overall": 8.5,
+        "recommendation": "推荐上线"
+      },
+      "structure": {
+        "事件概述": true,
+        "可量化性评估": true,
+        "预言机与结算": true,
+        "市场需求分析": true,
+        "合规与风险": true,
+        "综合结论": true
+      },
+      "structure_complete": true,
+      "error": null
+    },
+    {
+      "index": 2,
+      "topic": "比特币2025年突破15万美元",
+      "category": "加密货币",
+      "status": "success",
+      "time_seconds": 68.7,
+      "report_length": 2505,
+      "estimated_tokens": 1306,
+      "scores": {
+        "quantifiability": null,
+        "oracle": null,
+        "market_demand": null,
+        "compliance_risk": null,
+        "overall": null,
+        "recommendation": "推荐上线"
+      },
+      "structure": {
+        "事件概述": true,
+        "可量化性评估": true,
+        "预言机与结算": true,
+        "市场需求分析": true,
+        "合规与风险": true,
+        "综合结论": true
+      },
+      "structure_complete": true,
+      "error": null
+    },
+    {
+      "index": 3,
+      "topic": "特斯拉股价2025年翻倍",
+      "category": "股票",
+      "status": "success",
+      "time_seconds": 62.9,
+      "report_length": 2507,
+      "estimated_tokens": 1186,
+      "scores": {
+        "quantifiability": null,
+        "oracle": null,
+        "market_demand": null,
+        "compliance_risk": null,
+        "overall": null,
+        "recommendation": "推荐上线"
+      },
+      "structure": {
+        "事件概述": true,
+        "可量化性评估": true,
+        "预言机与结算": true,
+        "市场需求分析": true,
+        "合规与风险": true,
+        "综合结论": true
+      },
+      "structure_complete": true,
+      "error": null
+    },
+    {
+      "index": 4,
+      "topic": "2025年俄乌战争停火协议签署",
+      "category": "地缘政治",
+      "status": "success",
+      "time_seconds": 65.0,
+      "report_length": 2040,
+      "estimated_tokens": 1165,
+      "scores": {
+        "quantifiability": null,
+        "oracle": null,
+        "market_demand": 7.0,
+        "compliance_risk": 7.0,
+        "overall": null,
+        "recommendation": "谨慎上线"
+      },
+      "structure": {
+        "事件概述": true,
+        "可量化性评估": true,
+        "预言机与结算": true,
+        "市场需求分析": true,
+        "合规与风险": true,
+        "综合结论": true
+      },
+      "structure_complete": true,
+      "error": null
+    },
+    {
+      "index": 5,
+      "topic": "2025年中美关税全面取消",
+      "category": "国际贸易",
+      "status": "success",
+      "time_seconds": 77.4,
+      "report_length": 1669,
+      "estimated_tokens": 932,
+      "scores": {
+        "quantifiability": null,
+        "oracle": null,
+        "market_demand": null,
+        "compliance_risk": 8.0,
+        "overall": null,
+        "recommendation": "谨慎上线"
+      },
+      "structure": {
+        "事件概述": true,
+        "可量化性评估": true,
+        "预言机与结算": true,
+        "市场需求分析": true,
+        "合规与风险": true,
+        "综合结论": true
+      },
+      "structure_complete": true,
+      "error": null
+    },
+    {
+      "index": 6,
+      "topic": "OpenAI发布GPT-5",
+      "category": "人工智能",
+      "status": "success",
+      "time_seconds": 62.7,
+      "report_length": 2611,
+      "estimated_tokens": 1334,
+      "scores": {
+        "quantifiability": 9.0,
+        "oracle": 9.0,
+        "market_demand": 9.0,
+        "compliance_risk": 6.0,
+        "overall": null,
+        "recommendation": "推荐上线"
+      },
+      "structure": {
+        "事件概述": true,
+        "可量化性评估": true,
+        "预言机与结算": true,
+        "市场需求分析": true,
+        "合规与风险": true,
+        "综合结论": true
+      },
+      "structure_complete": true,
+      "error": null
+    },
+    {
+      "index": 7,
+      "topic": "苹果2025年发布AR眼镜",
+      "category": "消费电子",
+      "status": "success",
+      "time_seconds": 72.4,
+      "report_length": 2657,
+      "estimated_tokens": 1315,
+      "scores": {
+        "quantifiability": null,
+        "oracle": 8.0,
+        "market_demand": 9.0,
+        "compliance_risk": 6.0,
+        "overall": null,
+        "recommendation": "推荐上线"
+      },
+      "structure": {
+        "事件概述": true,
+        "可量化性评估": true,
+        "预言机与结算": true,
+        "市场需求分析": true,
+        "合规与风险": true,
+        "综合结论": true
+      },
+      "structure_complete": true,
+      "error": null
+    },
+    {
+      "index": 8,
+      "topic": "SpaceX星舰成功进入火星轨道",
+      "category": "航天",
+      "status": "success",
+      "time_seconds": 73.6,
+      "report_length": 2056,
+      "estimated_tokens": 1069,
+      "scores": {
+        "quantifiability": null,
+        "oracle": 8.0,
+        "market_demand": null,
+        "compliance_risk": 7.0,
+        "overall": null,
+        "recommendation": "推荐上线"
+      },
+      "structure": {
+        "事件概述": true,
+        "可量化性评估": true,
+        "预言机与结算": true,
+        "市场需求分析": true,
+        "合规与风险": true,
+        "综合结论": true
+      },
+      "structure_complete": true,
+      "error": null
+    },
+    {
+      "index": 9,
+      "topic": "2026年世界杯阿根廷卫冕成功",
+      "category": "体育/足球",
+      "status": "success",
+      "time_seconds": 50.3,
+      "report_length": 1975,
+      "estimated_tokens": 1053,
+      "scores": {
+        "quantifiability": 10.0,
+        "oracle": 9.0,
+        "market_demand": 9.0,
+        "compliance_risk": 4.0,
+        "overall": 8.0,
+        "recommendation": "谨慎上线"
+      },
+      "structure": {
+        "事件概述": true,
+        "可量化性评估": true,
+        "预言机与结算": true,
+        "市场需求分析": true,
+        "合规与风险": true,
+        "综合结论": true
+      },
+      "structure_complete": true,
+      "error": null
+    },
+    {
+      "index": 10,
+      "topic": "2028洛杉矶奥运会中国金牌第一",
+      "category": "体育/奥运",
+      "status": "success",
+      "time_seconds": 58.6,
+      "report_length": 1833,
+      "estimated_tokens": 989,
+      "scores": {
+        "quantifiability": null,
+        "oracle": null,
+        "market_demand": null,
+        "compliance_risk": null,
+        "overall": null,
+        "recommendation": "推荐上线"
+      },
+      "structure": {
+        "事件概述": true,
+        "可量化性评估": true,
+        "预言机与结算": true,
+        "市场需求分析": true,
+        "合规与风险": true,
+        "综合结论": true
+      },
+      "structure_complete": true,
+      "error": null
+    },
+    {
+      "index": 11,
+      "topic": "2025年全球平均气温创历史新高",
+      "category": "气候",
+      "status": "success",
+      "time_seconds": 63.1,
+      "report_length": 2785,
+      "estimated_tokens": 1367,
+      "scores": {
+        "quantifiability": 9.0,
+        "oracle": null,
+        "market_demand": 9.0,
+        "compliance_risk": 8.0,
+        "overall": null,
+        "recommendation": "推荐上线"
+      },
+      "structure": {
+        "事件概述": true,
+        "可量化性评估": true,
+        "预言机与结算": true,
+        "市场需求分析": true,
+        "合规与风险": true,
+        "综合结论": true
+      },
+      "structure_complete": true,
+      "error": null
+    },
+    {
+      "index": 12,
+      "topic": "WHO宣布新冠大流行正式结束",
+      "category": "公共卫生",
+      "status": "error",
+      "time_seconds": 16.4,
+      "report_length": 0,
+      "estimated_tokens": 0,
+      "scores": {},
+      "structure": {},
+      "structure_complete": false,
+      "error": "Fatal API error - compliance_risk briefing generation failed: Connection error."
+    },
+    {
+      "index": 13,
+      "topic": "英伟达市值2025年超过苹果",
+      "category": "科技股",
+      "status": "success",
+      "time_seconds": 57.0,
+      "report_length": 1751,
+      "estimated_tokens": 939,
+      "scores": {
+        "quantifiability": null,
+        "oracle": null,
+        "market_demand": null,
+        "compliance_risk": null,
+        "overall": null,
+        "recommendation": "推荐上线"
+      },
+      "structure": {
+        "事件概述": true,
+        "可量化性评估": true,
+        "预言机与结算": true,
+        "市场需求分析": true,
+        "合规与风险": true,
+        "综合结论": true
+      },
+      "structure_complete": true,
+      "error": null
+    },
+    {
+      "index": 14,
+      "topic": "2025年日本发生8级以上地震",
+      "category": "自然灾害",
+      "status": "success",
+      "time_seconds": 81.3,
+      "report_length": 1666,
+      "estimated_tokens": 889,
+      "scores": {
+        "quantifiability": null,
+        "oracle": null,
+        "market_demand": null,
+        "compliance_risk": null,
+        "overall": null,
+        "recommendation": "谨慎上线"
+      },
+      "structure": {
+        "事件概述": true,
+        "可量化性评估": true,
+        "预言机与结算": true,
+        "市场需求分析": true,
+        "合规与风险": true,
+        "综合结论": true
+      },
+      "structure_complete": true,
+      "error": null
+    },
+    {
+      "index": 15,
+      "topic": "2025年奥斯卡最佳影片由AI生成电影获得",
+      "category": "娱乐",
+      "status": "error",
+      "time_seconds": 23.8,
+      "report_length": 0,
+      "estimated_tokens": 0,
+      "scores": {},
+      "structure": {},
+      "structure_complete": false,
+      "error": "Fatal API error - quantifiability briefing generation failed: Connection error."
+    }
+  ]
+}

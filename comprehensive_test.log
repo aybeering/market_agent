@@ -1,0 +1,5 @@
+.env file not found at /Users/ayang/agent/market-agent/workflow/.env. Using system environment variables.
+Error fetching raw content for https://privatebank.jpmorgan.com/apac/cn/insights/markets-and-investing/tmt/in-the-rear-view-how-did-our-2025-themes-pan-out: 
+Error fetching raw content for https://finance.sina.com.cn/stock/usstock/c/2025-01-30/doc-inehsuei5731624.shtml: 
+Error fetching raw content for https://www.yicai.com/news/102946944.html: 
+Error fetching raw content for https://www.stcn.com/article/detail/3344585.html: 

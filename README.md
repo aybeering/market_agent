@@ -112,7 +112,4 @@ export TAVILY_API_KEY="your-tavily-api-key"
         else:
             print(result.error)
 
-# 运行分析
-async for state in graph.run({"configurable": {"thread_id": "1"}}):
-    print(state)
 ```

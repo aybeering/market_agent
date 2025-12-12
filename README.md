@@ -104,14 +104,13 @@ export TAVILY_API_KEY="your-tavily-api-key"
 ## 使用示例
 
 ```python
-from workflow.backend.graph import Graph
 
 # 创建分析任务
-graph = Graph(
-    topic="2024年美联储降息",
-    event_category="经济",
-    target_date="2024-12-31"
-)
+ result = await Search.go("比特币2025年突破15万美元")
+         if result.success:
+            print(result.report)
+        else:
+            print(result.error)
 
 # 运行分析
 async for state in graph.run({"configurable": {"thread_id": "1"}}):
